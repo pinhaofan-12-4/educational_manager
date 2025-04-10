@@ -1,4 +1,11 @@
+安装依赖
 ```
-ok
+pnpm install
+
+```
+
+启动项目
+```
+pnpm run dev
 
 ```
