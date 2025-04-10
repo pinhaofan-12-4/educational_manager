@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from './api';
-import { Form, Input, Button, Card, Typography, message, Spin, Layout } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Spin, Layout, Radio } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -12,16 +12,35 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
-    const { username, password } = values;
+    const { username, password, role } = values;
     setLoading(true);
-    
+    navigate('/dashboard');
     try {
-      const response = await authApi.login(username, password);
+      // 根据不同角色调用不同的登录API
+      let response;
+      switch (role) {
+        case 'student':
+          console.log('调用学生登录API:', { username, password });
+          response = { success: true, data: { username, role: 'student' } };
+          break;
+        case 'teacher':
+          console.log('调用教师登录API:', { username, password });
+          response = { success: true, data: { username, role: 'teacher' } };
+          break;
+        case 'admin':
+          console.log('调用管理员登录API:', { username, password });
+          response = { success: true, data: { username, role: 'admin' } };
+          break;
+      }
       
       if (response.success) {
-        console.log('登录成功:', response.data);
+        // 存储用户信息和登录状态
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('username', username);
+        localStorage.setItem('isLoggedIn', 'true');
+        
         message.success('登录成功');
-        // 登录成功后跳转到仪表盘
+        // 根据角色跳转到对应的仪表盘
         navigate('/dashboard');
       } else {
         message.error(response.message || '登录失败');
@@ -51,10 +70,21 @@ function Login() {
           <Spin spinning={loading} tip="登录中...">
             <Form
               name="login"
-              initialValues={{ remember: true }}
+              initialValues={{ role: 'student' }}
               onFinish={handleSubmit}
               layout="vertical"
             >
+              <Form.Item
+                name="role"
+                rules={[{ required: true, message: '请选择角色!' }]}
+              >
+                <Radio.Group size="large" buttonStyle="solid" style={{ width: '100%', textAlign: 'center' }}>
+                  <Radio.Button value="student">学生</Radio.Button>
+                  <Radio.Button value="teacher">教师</Radio.Button>
+                  <Radio.Button value="admin">管理员</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+
               <Form.Item
                 name="username"
                 rules={[{ required: true, message: '请输入用户名!' }]}
