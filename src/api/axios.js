@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // 创建axios实例
 const api = axios.create({
-  // 使用相对路径，不要设置baseURL，让请求直接发送到当前域名
-  // baseURL: '/api',
+  // 在开发环境中使用相对路径
+  baseURL: 'http://localhost:8080',  // 空字符串让请求发送到当前域名
   timeout: 5000,  // 请求超时时间
   headers: {
     'Content-Type': 'application/json',
@@ -18,6 +18,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // 打印请求信息，帮助调试
+    console.log('发送请求:', config.method.toUpperCase(), config.url, config.data);
+    
     return config;
   },
   error => {
@@ -30,12 +34,21 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   response => {
+    // 打印响应数据，帮助调试
+    console.log('收到响应:', response.config.url, response.data);
+    
     // 如果响应正常，直接返回数据
     return response.data;
   },
   error => {
+    // 打印错误信息，帮助调试
+    console.error('请求失败:', error.config?.url, error.message);
+    
     // 根据错误状态码进行不同处理
     if (error.response) {
+      console.error('错误响应状态:', error.response.status);
+      console.error('错误响应数据:', error.response.data);
+      
       switch (error.response.status) {
         case 401:
           // 未授权，清除token并重定向到登录页

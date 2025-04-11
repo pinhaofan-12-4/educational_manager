@@ -11,6 +11,8 @@ import {
 
 // 真实登录API
 export const login = async (username, password, role) => {
+  console.log('调用登录API:', { username, role });
+  
   try {
     // 调用真实的后端API，添加role参数
     const response = await api.post('/api/accounts/login', {
@@ -18,6 +20,8 @@ export const login = async (username, password, role) => {
       password,
       role
     });
+    
+    console.log('登录响应:', response);
     
     // 假设后端返回的数据格式为 { success: true, data: { user, token }, message: '...' }
     if (response.success) {
@@ -43,6 +47,8 @@ export const login = async (username, password, role) => {
 
 // 真实注册API
 export const register = async (username, password, role) => {
+  console.log('调用注册API:', { username, role });
+  
   try {
     // 调用真实的后端API，添加role参数
     const response = await api.post('/api/accounts/register', {
@@ -50,6 +56,8 @@ export const register = async (username, password, role) => {
       password,
       role
     });
+    
+    console.log('注册响应:', response);
     
     return response;
   } catch (error) {
