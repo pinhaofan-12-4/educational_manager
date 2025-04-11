@@ -13,7 +13,7 @@ import {
 export const login = async (username, password, role) => {
   try {
     // 调用真实的后端API，添加role参数
-    const response = await api.post('/accounts/login', {
+    const response = await api.post('/api/accounts/login', {
       username,
       password,
       role
@@ -45,7 +45,7 @@ export const login = async (username, password, role) => {
 export const register = async (username, password, role) => {
   try {
     // 调用真实的后端API，添加role参数
-    const response = await api.post('/accounts/register', {
+    const response = await api.post('/api/accounts/register', {
       username,
       password,
       role

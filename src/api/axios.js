@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // 创建axios实例
 const api = axios.create({
-  // 使用相对路径，会被Vite代理处理
-  baseURL: '/api',
+  // 使用相对路径，不要设置baseURL，让请求直接发送到当前域名
+  // baseURL: '/api',
   timeout: 5000,  // 请求超时时间
   headers: {
     'Content-Type': 'application/json',
