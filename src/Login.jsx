@@ -14,33 +14,15 @@ function Login() {
   const handleSubmit = async (values) => {
     const { username, password, role } = values;
     setLoading(true);
-    navigate('/dashboard');
+    
     try {
-      // 根据不同角色调用不同的登录API
-      let response;
-      switch (role) {
-        case 'student':
-          console.log('调用学生登录API:', { username, password });
-          response = { success: true, data: { username, role: 'student' } };
-          break;
-        case 'teacher':
-          console.log('调用教师登录API:', { username, password });
-          response = { success: true, data: { username, role: 'teacher' } };
-          break;
-        case 'admin':
-          console.log('调用管理员登录API:', { username, password });
-          response = { success: true, data: { username, role: 'admin' } };
-          break;
-      }
+      // 调用真实登录API，并传递角色参数
+      const response = await authApi.login(username, password, role);
       
       if (response.success) {
-        // 存储用户信息和登录状态
-        localStorage.setItem('userRole', role);
-        localStorage.setItem('username', username);
-        localStorage.setItem('isLoggedIn', 'true');
-        
+        // 登录API会自动设置角色信息，不需要手动设置
         message.success('登录成功');
-        // 根据角色跳转到对应的仪表盘
+        // 跳转到仪表盘
         navigate('/dashboard');
       } else {
         message.error(response.message || '登录失败');

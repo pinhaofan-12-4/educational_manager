@@ -1,3 +1,4 @@
+import api from './axios';
 import { 
   delay, 
   generateId, 
@@ -8,90 +9,61 @@ import {
   STORAGE_KEYS
 } from './mockUtils';
 
-// 模拟登录API
-export const login = async (username, password) => {
-  // 模拟延迟，模拟网络请求
-  await delay(700);
-  
+// 真实登录API
+export const login = async (username, password, role) => {
   try {
-    // 获取已注册用户列表
-    const users = getMockUsers();
-    
-    // 检查用户是否存在
-    const user = users.find(u => u.username === username);
-    
-    if (!user) {
-      return formatResponse(false, null, '用户不存在');
-    }
-    
-    // 检查密码是否正确
-    if (user.password !== password) {
-      return formatResponse(false, null, '密码错误');
-    }
-    
-    // 生成令牌
-    const token = generateToken();
-    
-    // 存储登录状态
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify({
-      id: user.id,
-      username: user.username,
-      // 不包含密码等敏感信息
-    }));
-    
-    return formatResponse(true, {
-      user: {
-        id: user.id,
-        username: user.username
-      },
-      token
-    }, '登录成功');
-  } catch (error) {
-    console.error('登录出错:', error);
-    return formatResponse(false, null, '登录失败，请稍后再试');
-  }
-};
-
-// 模拟注册API
-export const register = async (username, password) => {
-  // 模拟延迟，模拟网络请求
-  await delay(700);
-  
-  try {
-    // 获取已注册用户列表
-    const users = getMockUsers();
-    
-    // 检查用户名是否已存在
-    if (users.some(u => u.username === username)) {
-      return formatResponse(false, null, '用户名已被注册');
-    }
-    
-    // 创建新用户
-    const newUser = {
-      id: generateId(),
+    // 调用真实的后端API，添加role参数
+    const response = await api.post('/api/accounts/login', {
       username,
       password,
-      createdAt: new Date().toISOString()
-    };
+      role
+    });
     
-    // 将新用户添加到用户列表
-    users.push(newUser);
-    saveMockUsers(users);
+    // 假设后端返回的数据格式为 { success: true, data: { user, token }, message: '...' }
+    if (response.success) {
+      // 保存令牌和用户信息到本地存储
+      localStorage.setItem(STORAGE_KEYS.TOKEN, response.data.token);
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(response.data.user));
+      localStorage.setItem('userRole', response.data.user.role || role);
+      localStorage.setItem('username', response.data.user.username);
+      localStorage.setItem('isLoggedIn', 'true');
+    }
     
-    return formatResponse(true, {
-      user: {
-        id: newUser.id,
-        username: newUser.username
-      }
-    }, '注册成功');
+    return response;
   } catch (error) {
-    console.error('注册出错:', error);
-    return formatResponse(false, null, '注册失败，请稍后再试');
+    console.error('登录出错:', error);
+    // 如果API调用失败，返回错误信息
+    return {
+      success: false,
+      data: null,
+      message: error.response?.data?.message || '登录失败，请稍后再试'
+    };
   }
 };
 
-// 模拟退出登录API
+// 真实注册API
+export const register = async (username, password, role) => {
+  try {
+    // 调用真实的后端API，添加role参数
+    const response = await api.post('/api/accounts/register', {
+      username,
+      password,
+      role
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('注册出错:', error);
+    // 如果API调用失败，返回错误信息
+    return {
+      success: false,
+      data: null,
+      message: error.response?.data?.message || '注册失败，请稍后再试'
+    };
+  }
+};
+
+// 模拟退出登录API (可以在后续更新为真实API)
 export const logout = async () => {
   await delay(300);
   
@@ -99,6 +71,9 @@ export const logout = async () => {
     // 清除登录状态
     localStorage.removeItem(STORAGE_KEYS.TOKEN);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username');
+    localStorage.removeItem('isLoggedIn');
     
     return formatResponse(true, null, '已成功退出登录');
   } catch (error) {

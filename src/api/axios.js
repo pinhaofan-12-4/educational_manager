@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // 创建axios实例
 const api = axios.create({
-  // 在真实环境中，这里应该是你的API服务器地址
-  baseURL: '/api',
+  // 设置真实API服务器地址
+  baseURL: 'http://127.0.0.1:8080',
   timeout: 5000,  // 请求超时时间
   headers: {
     'Content-Type': 'application/json',
